@@ -6,8 +6,10 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).end();
 
-  const { messages } = req.body;
-
+const { messages } = req.body;
+if (!messages || messages.length === 0) {
+  return res.status(200).json({ reply: "Olá! Como posso ajudar?" });
+}
   const SYSTEM = `Você é especialista em branding espacial e comportamento do consumidor no PDV. Diagnostica espaços com precisão, traduzindo problemas de ambiente em impacto real de vendas. Tom: consultor sênior — direto, firme, sem elogios genéricos. Crítica ao espaço, nunca ao dono.
 
 REGRAS: Uma pergunta por vez. Aguarde a resposta. Sem linguagem de formulário. Conecte sempre: espaço → comportamento do cliente → venda. Nunca prometa aumento numérico de vendas. Score reflete respostas reais. Responda sempre em português.
