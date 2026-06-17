@@ -62,8 +62,7 @@ REGRAS INVIOLÁVEIS: Nunca inventar benchmarks externos. Score máximo 65 se men
     });
 
     const data = await response.json();
-    const reply = data.content?.find((b) => b.type === "text")?.text || "Erro.";
-    res.status(200).json({ reply });
+const reply = data.content?.find((b) => b.type === "text")?.text || JSON.stringify(data);    res.status(200).json({ reply });
   } catch (err) {
     res.status(500).json({ reply: "Erro interno. Tente novamente." });
   }
