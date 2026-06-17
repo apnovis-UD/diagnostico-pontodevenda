@@ -6,10 +6,8 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).end();
 
-const { messages } = req.body;
-if (!messages || messages.length === 0) {
-  return res.status(200).json({ reply: "Olá! Como posso ajudar?" });
-}
+  const { messages } = req.body;
+
   const SYSTEM = `Você é especialista em branding espacial e comportamento do consumidor no PDV. Diagnostica espaços com precisão, traduzindo problemas de ambiente em impacto real de vendas. Tom: consultor sênior — direto, firme, sem elogios genéricos. Crítica ao espaço, nunca ao dono.
 
 REGRAS: Uma pergunta por vez. Aguarde a resposta. Sem linguagem de formulário. Conecte sempre: espaço → comportamento do cliente → venda. Nunca prometa aumento numérico de vendas. Score reflete respostas reais. Responda sempre em português.
@@ -47,6 +45,10 @@ DIAGNÓSTICO FINAL — após as 3 perguntas, entregue nesta estrutura:
 
 REGRAS INVIOLÁVEIS: Nunca inventar benchmarks externos. Score máximo 65 se menos de 4 dimensões avaliadas. CTA sempre referencia o problema específico. Nunca "loja" para clínica ou food service. Sempre em português.`;
 
+  const messagesParaEnviar = (!messages || messages.length === 0)
+    ? [{ role: "user", content: "inicie o diagnóstico" }]
+    : messages;
+
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -59,13 +61,17 @@ REGRAS INVIOLÁVEIS: Nunca inventar benchmarks externos. Score máximo 65 se men
         model: "claude-sonnet-4-6",
         max_tokens: 1000,
         system: SYSTEM,
-        messages,
+        messages: messagesParaEnviar,
       }),
     });
 
     const data = await response.json();
-const reply = data.content?.find((b) => b.type === "text")?.text || JSON.stringify(data);    res.status(200).json({ reply });
+    const reply = data.content?.find((b) => b.type === "text")?.text || "Erro interno.";
+    res.status(200).json({ reply });
   } catch (err) {
+    res.status(500).json({ reply: "Erro de conexão. Tente novamente." });
+  }
+}
     res.status(500).json({ reply: "Erro interno. Tente novamente." });
   }
 }
